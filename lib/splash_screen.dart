@@ -3,7 +3,7 @@ import 'dart:async';
 import 'main.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -25,9 +25,9 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const WebViewContainer()),
-      );
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => WebViewContainer()));
     });
   }
 
