@@ -29,7 +29,17 @@ class _AstknanAppState extends State<AstknanApp> {
   @override
   void initState() {
     super.initState();
-    _startInternetCheckTimer();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkInternetAndShowOverlay();
+      _startInternetCheckTimer();
+    });
+  }
+
+  void _checkInternetAndShowOverlay() async {
+    bool connected = await _hasRealInternet();
+    if (!connected && !_overlayShown) {
+      _showNoInternetOverlay();
+    }
   }
 
   void _startInternetCheckTimer() {
@@ -142,9 +152,10 @@ class _WebViewContainerState extends State<WebViewContainer> {
         body: SafeArea(
           child: InAppWebView(
             initialUrlRequest: URLRequest(url: WebUri(mainUrl)),
-            initialOptions: InAppWebViewGroupOptions(
-              crossPlatform: InAppWebViewOptions(javaScriptEnabled: true),
-            ),
+            initialSettings: InAppWebViewSettings(javaScriptEnabled: true),
+            // initialOptions: InAppWebViewGroupOptions(
+            //   crossPlatform: InAppWebViewOptions(javaScriptEnabled: true),
+            // ),
             onWebViewCreated: (controller) {
               webViewController = controller;
             },
