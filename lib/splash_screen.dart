@@ -3,7 +3,7 @@ import 'dart:async';
 import 'main.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -24,11 +24,20 @@ class _SplashScreenState extends State<SplashScreen>
     _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
 
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const WebViewContainer()),
-      );
-    });
+    Timer(
+      const Duration(seconds: 3),
+      () => Navigator.pushReplacement(
+        context,
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const WebViewContainer(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      ),
+    );
   }
 
   @override
@@ -39,12 +48,24 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final imageSize = size.width * 0.4;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: ScaleTransition(
-          scale: _animation,
-          child: Image.asset('assets/logo.png', width: 180, height: 180),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            FadeTransition(
+              opacity: _animation,
+              child: Image.asset(
+                'assets/logo.png',
+                width: imageSize,
+                height: imageSize,
+              ),
+            ),
+          ],
         ),
       ),
     );
