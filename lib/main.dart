@@ -31,8 +31,8 @@ class _AstknanAppState extends State<AstknanApp> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkInternetAndShowOverlay();
-      _startInternetCheckTimer();
     });
+    _startInternetCheckTimer();
   }
 
   void _checkInternetAndShowOverlay() async {
