@@ -23,7 +23,7 @@ class AstknanApp extends StatefulWidget {
 class _AstknanAppState extends State<AstknanApp> {
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   Timer? _timer;
-  bool _hasInternet = true;
+  // bool _hasInternet = true;
   bool _overlayShown = false;
 
   @override
