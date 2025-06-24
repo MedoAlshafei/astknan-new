@@ -4,7 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'splash_screen.dart';
 import 'no_internet_screen.dart';
 import 'dart:io';
-import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
 
 void main() async {
