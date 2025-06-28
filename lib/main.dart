@@ -10,7 +10,7 @@ import 'dart:async';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await InAppWebViewController.setWebContentsDebuggingEnabled(true);
+  // await InAppWebViewController.setWebContentsDebuggingEnabled(true);
   runApp(const AstknanApp());
 }
 
@@ -196,15 +196,15 @@ class _WebViewContainerState extends State<WebViewContainer> {
             },
             onLoadStart: (controller, url) {
               // يمكن إضافة منطق إضافي هنا عند بدء التحميل
-              print('بدء تحميل: $url');
+              // print('بدء تحميل: $url');
             },
             onLoadStop: (controller, url) async {
               // حقن JavaScript لمراقبة الروابط
               await _injectOAuthDetectionScript(controller);
-              print('انتهاء تحميل: $url');
+              // print('انتهاء تحميل: $url');
             },
             onReceivedError: (controller, request, error) {
-              print('خطأ في التحميل: ${error.description}');
+              // print('خطأ في التحميل: ${error.description}');
             },
           ),
         ),
@@ -242,7 +242,7 @@ class _WebViewContainerState extends State<WebViewContainer> {
         throw 'Could not launch $url';
       }
     } catch (e) {
-      print('خطأ في فتح الرابط: $e');
+      // print('خطأ في فتح الرابط: $e');
       Fluttertoast.showToast(
         msg: "خطأ في فتح صفحة تسجيل الدخول",
         toastLength: Toast.LENGTH_SHORT,
