@@ -196,15 +196,15 @@ class _WebViewContainerState extends State<WebViewContainer> {
             },
             onLoadStart: (controller, url) {
               // يمكن إضافة منطق إضافي هنا عند بدء التحميل
-              // print('بدء تحميل: $url');
+              print('بدء تحميل: $url');
             },
             onLoadStop: (controller, url) async {
               // حقن JavaScript لمراقبة الروابط
               await _injectOAuthDetectionScript(controller);
-              // print('انتهاء تحميل: $url');
+              print('انتهاء تحميل: $url');
             },
             onReceivedError: (controller, request, error) {
-              // print('خطأ في التحميل: ${error.description}');
+              print('خطأ في التحميل: ${error.description}');
             },
           ),
         ),
