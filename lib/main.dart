@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'splash_screen.dart';
 import 'no_internet_screen.dart';
 import 'dart:io';
@@ -109,6 +110,15 @@ class _WebViewContainerState extends State<WebViewContainer> {
   static const String mainUrl = "https://astknan.com/";
   DateTime? lastBackPressTime;
 
+  // قائمة بالروابط التي يجب فتحها في متصفح خارجي
+  final List<String> externalUrlPatterns = [
+    'accounts.google.com',
+    'social-login.oxiapps.com/auth/google',
+    'oauth',
+    'login.google.com',
+    'google.com/oauth',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -158,10 +168,181 @@ class _WebViewContainerState extends State<WebViewContainer> {
             // ),
             onWebViewCreated: (controller) {
               webViewController = controller;
+              controller.addJavaScriptHandler(
+                handlerName: 'oauthHandler',
+                callback: (args) {
+                  if (args.isNotEmpty) {
+                    String url = args[0].toString();
+                    if (_shouldOpenExternally(url)) {
+                      _launchExternalBrowser(url);
+                    }
+                  }
+                },
+              );
+            },
+            shouldOverrideUrlLoading: (controller, navigationAction) async {
+              var uri = navigationAction.request.url!;
+              String url = uri.toString();
+
+              // فحص إذا كان الرابط يحتاج لفتح في متصفح خارجي
+              if (_shouldOpenExternally(url)) {
+                // منع التنقل في WebView
+                await _launchExternalBrowser(url);
+                return NavigationActionPolicy.CANCEL;
+              }
+
+              // السماح بالتنقل العادي
+              return NavigationActionPolicy.ALLOW;
+            },
+            onLoadStart: (controller, url) {
+              // يمكن إضافة منطق إضافي هنا عند بدء التحميل
+              print('بدء تحميل: $url');
+            },
+            onLoadStop: (controller, url) async {
+              // حقن JavaScript لمراقبة الروابط
+              await _injectOAuthDetectionScript(controller);
+              print('انتهاء تحميل: $url');
+            },
+            onReceivedError: (controller, request, error) {
+              print('خطأ في التحميل: ${error.description}');
             },
           ),
         ),
       ),
     );
+  }
+
+  // فحص إذا كان الرابط يحتاج لفتح في متصفح خارجي
+  bool _shouldOpenExternally(String url) {
+    return externalUrlPatterns.any((pattern) => url.contains(pattern));
+  }
+
+  // فتح الرابط في متصفح خارجي
+  Future<void> _launchExternalBrowser(String url) async {
+    try {
+      final Uri uri = Uri.parse(url);
+
+      // محاولة فتح الرابط في متصفح النظام
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication, // فتح في متصفح خارجي
+        );
+
+        // عرض رسالة للمستخدم
+        Fluttertoast.showToast(
+          msg: "سيتم فتح صفحة تسجيل الدخول في المتصفح",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          backgroundColor: Colors.blue,
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      } else {
+        throw 'Could not launch $url';
+      }
+    } catch (e) {
+      print('خطأ في فتح الرابط: $e');
+      Fluttertoast.showToast(
+        msg: "خطأ في فتح صفحة تسجيل الدخول",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  // إنشاء User Agent مخصص
+  String _getCustomUserAgent() {
+    // إزالة العلامات التي تشير إلى WebView
+    if (Platform.isAndroid) {
+      return 'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36';
+    } else if (Platform.isIOS) {
+      return 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1';
+    }
+    return 'Mozilla/5.0 (compatible; CustomApp/1.0)';
+  }
+
+  // حقن JavaScript لمراقبة الروابط
+  Future<void> _injectOAuthDetectionScript(
+    InAppWebViewController controller,
+  ) async {
+    await controller.evaluateJavascript(
+      source: '''
+      (function() {
+        // مراقبة النقرات على الروابط
+        document.addEventListener('click', function(e) {
+          var target = e.target;
+          var url = '';
+          
+          // البحث عن الرابط في العنصر أو العناصر الأب
+          while (target && target !== document) {
+            if (target.tagName === 'A' && target.href) {
+              url = target.href;
+              break;
+            }
+            target = target.parentNode;
+          }
+          
+          // فحص إذا كان الرابط يحتوي على OAuth
+          if (url && (url.includes('accounts.google.com') || 
+                     url.includes('social-login.oxiapps.com/auth/google') ||
+                     url.includes('oauth'))) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // إرسال الرابط إلى Flutter
+            window.flutter_inappwebview.callHandler('oauthHandler', url);
+            
+            return false;
+          }
+        }, true);
+        
+        // مراقبة تغييرات الـ URL
+        var originalPushState = history.pushState;
+        var originalReplaceState = history.replaceState;
+        
+        history.pushState = function() {
+          originalPushState.apply(history, arguments);
+          checkCurrentUrl();
+        };
+        
+        history.replaceState = function() {
+          originalReplaceState.apply(history, arguments);
+          checkCurrentUrl();
+        };
+        
+        window.addEventListener('popstate', checkCurrentUrl);
+        
+        function checkCurrentUrl() {
+          var currentUrl = window.location.href;
+          if (currentUrl.includes('accounts.google.com') || 
+              currentUrl.includes('social-login.oxiapps.com/auth/google') ||
+              currentUrl.includes('oauth')) {
+            window.flutter_inappwebview.callHandler('oauthHandler', currentUrl);
+          }
+        }
+        
+        // فحص الـ URL الحالي
+        checkCurrentUrl();
+      })();
+    ''',
+    );
+  }
+}
+
+// إضافة معالج للعودة من المتصفح الخارجي
+class AppLifecycleHandler extends WidgetsBindingObserver {
+  final VoidCallback onResumed;
+
+  AppLifecycleHandler({required this.onResumed});
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      onResumed();
+    }
   }
 }

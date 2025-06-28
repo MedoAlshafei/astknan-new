@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.astknan"
+    namespace = "com.astknan.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -20,10 +20,9 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        // تم تحديث معرف التطبيق ليكون فريدًا
         applicationId = "com.astknan.store"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        // يتم جلب versionCode و versionName من pubspec.yaml عبر flutter.versionCode و flutter.versionName
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
