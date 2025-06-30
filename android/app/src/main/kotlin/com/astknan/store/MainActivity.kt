@@ -1,4 +1,4 @@
-package com.astknan.app
+package com.astknan.store
 
 import io.flutter.embedding.android.FlutterActivity
 

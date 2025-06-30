@@ -15,12 +15,17 @@
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="http" />
         </intent>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
     </queries>
 
     <application
         android:label="استكنان"
         android:name="${applicationName}"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/launcher_icon"
+        package="com.astknan.store">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -42,8 +47,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- استبدل "astknan" بـ scheme مخصص لتطبيقك -->
-                <data android:scheme="com.astknan.app" />
+                <data android:scheme="com.astknan.store" android:host="auth-callback" />
             </intent-filter>
         </activity>
 
@@ -52,10 +56,4 @@
             android:value="2" />
     </application>
 
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.PROCESS_TEXT"/>
-            <data android:mimeType="text/plain"/>
-        </intent>
-    </queries>
 </manifest>

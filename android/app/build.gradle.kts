@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.astknan.app"
+    namespace = "com.astknan.store"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
@@ -38,7 +38,6 @@ android {
     }
 
     defaultConfig {
-        // تم تحديث معرف التطبيق ليكون فريدًا
         applicationId = "com.astknan.store"
         // يتم جلب versionCode و versionName من pubspec.yaml عبر flutter.versionCode و flutter.versionName
         minSdk = flutter.minSdkVersion

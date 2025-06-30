@@ -7,6 +7,7 @@ import 'no_internet_screen.dart';
 import 'dart:io';
 // import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
+import 'google_login_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -207,6 +208,18 @@ class _WebViewContainerState extends State<WebViewContainer> {
               print('خطأ في التحميل: ${error.description}');
             },
           ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            // استدعاء تسجيل الدخول بجوجل
+            try {
+              await GoogleLoginHandler.launchGoogleLogin(context);
+            } catch (e) {
+              Fluttertoast.showToast(msg: 'خطأ: $e');
+            }
+          },
+          icon: Icon(Icons.login),
+          label: Text('تسجيل دخول جوجل'),
         ),
       ),
     );
